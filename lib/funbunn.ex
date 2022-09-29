@@ -17,6 +17,4 @@ defmodule Funbunn do
   end
 end
 
-
 # data |> xpath(~x"//feed/entry"l, author: ~x"./author/name/text()", link: ~x"./link/@href", title: ~x"./title/text()", thumbnail: ~x"./media:thumbnail/@url")
-
