@@ -1,21 +1,43 @@
-# Funbunn
+# 🍔 🍔 Funbunn 🍔 🍔
 
-**TODO: Add description**
+Polls for new subreddit posts using `https://reddit.com/r/new/<subreddit>.json` and forwards it to a webhook (Currently supports Discord)
 
-## Installation
+To run
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `funbunn` to your list of dependencies in `mix.exs`:
+1. grab the `build.zip` from the [latest release](https://github.com/fmterrorf/funbunn/releases) and unzip it
+2. Quickest way to get started is to run 
 
-```elixir
-def deps do
-  [
-    {:funbunn, "~> 0.1.0"}
-  ]
-end
+        WEBHOOK_ROUTE_CONFIG_PATH="<absolute path to config>.json" ./bin/poll
+
+
+## Environment variables
+
+* `STORE`  - decides how to store the state of the app. Options are
+  - `inmemory` (default) - use in memory store
+  - `disk` - writes state into disk. Requires `STORE_FILENAME` env var. 
+  - `postgres` - use postgres. Requires `DATABASE_URL` env to be set
+
+* `WEBHOOK_ROUTE_CONFIG_PATH` - absolute path of the config file
+* `WEBHOOK_ROUTE_CONFIG_BASE64` - base64 representation of the config contents. Useful if you want to store the config file in secret env var
+
+
+## Config example
+
+config.json
+```json
+[
+  {
+    "webhook": "https://discord.com/webhook",
+    "subreddit": "saskatoon"
+  },
+  {
+    "webhook": "https://discord.com/webhook",
+    "subreddit": "saskatchewan"
+  }
+]
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/funbunn](https://hexdocs.pm/funbunn).
 
+Example message 
+
+![demo](./screenshot.png)

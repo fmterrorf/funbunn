@@ -24,3 +24,5 @@ funbunn-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+funbunn_store
