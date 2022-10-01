@@ -1,6 +1,6 @@
 # Funbunn
 
-Polls for new subreddit posts using https://reddit.com/r/new/<subreddit>.json and forwards it to a webhook (Currently supports Discord)
+Polls for new subreddit posts using `https://reddit.com/r/new/<subreddit>.json` and forwards it to a webhook (Currently supports Discord)
 
 To run
 
