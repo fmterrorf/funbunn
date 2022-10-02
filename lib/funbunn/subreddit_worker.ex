@@ -2,7 +2,7 @@ defmodule Funbunn.SubredditWorker do
   use GenServer, restart: :temporary
   require Logger
 
-  @poll_interval :timer.minutes(1)
+  @poll_interval :timer.minutes(10)
 
   def start_link(subreddit) do
     GenServer.start_link(__MODULE__, subreddit)
