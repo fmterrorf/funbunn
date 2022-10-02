@@ -13,7 +13,6 @@ defmodule Funbunn.WebhookDeliveryWorker do
 
   def handle_info({:deliver, key}, state) do
     attachment = Funbunn.Cache.get({:messages, key})
-    Logger.debug("Sending #{length(attachment)} attachments for subreddit #{state.subreddit}")
 
     Req.post!(
       state.webhook,

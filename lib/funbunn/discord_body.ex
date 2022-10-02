@@ -1,5 +1,6 @@
 defmodule Funbunn.DiscordBody do
   alias Funbunn.Api
+  @icon_url "https://www.redditstatic.com/desktop2x/img/favicon/favicon-32x32.png"
 
   @spec new([Api.reddit_response()]) :: [any()]
   def new(entries) do
@@ -16,7 +17,8 @@ defmodule Funbunn.DiscordBody do
       description: item.selftext,
       author: %{
         name: "u/" <> item.author_name,
-        url: "https://www.reddit.com/user/" <> item.author_name
+        url: "https://www.reddit.com/user/" <> item.author_name,
+        icon_url: @icon_url
       },
       footer: %{
         text: item.subreddit_name_prefixed

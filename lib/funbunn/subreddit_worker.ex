@@ -93,9 +93,9 @@ defmodule Funbunn.SubredditWorker do
     end)
   end
 
-  defp maybe_send_to_discord(_items, _subreddit, _ids = []) do
-    Logger.debug("Initial run of #{__MODULE__}. Skip sending messages to discord")
-  end
+  # defp maybe_send_to_discord(_items, _subreddit, _ids = []) do
+  #   Logger.debug("Initial run of #{__MODULE__}. Skip sending messages to discord")
+  # end
 
   defp maybe_send_to_discord(_items, _subreddit, _ids) do
     Logger.debug("No new items found. Skipping")
