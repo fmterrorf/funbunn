@@ -12,10 +12,10 @@ defmodule Funbunn.Api do
           thubnail_width: non_neg_integer() | nil
         }
 
-  @spec fetch_new_entries(binary(), binary()) :: {:ok, [reddit_response()]} | {:error, any()}
-  def fetch_new_entries(subbreddit, last_thread_name) do
-    json_link(subbreddit, last_thread_name)
-    |> Req.get!()
+  @spec fetch_new_entries(binary(), keyword()) :: {:ok, [reddit_response()]} | {:error, any()}
+  def fetch_new_entries(subbreddit, opts \\ []) do
+    json_link(subbreddit)
+    |> Req.get!(params: opts)
     |> handle_response
   end
 
@@ -47,13 +47,7 @@ defmodule Funbunn.Api do
     {:error, "call to reddit returned with error status #{response.status}"}
   end
 
-  def json_link(subreddit, last_thread_name) do
-    url = "#{@host}/r/#{subreddit}/new.json"
-
-    if last_thread_name do
-      "#{url}?before=#{last_thread_name}"
-    else
-      url
-    end
+  def json_link(subreddit) do
+    "#{@host}/r/#{subreddit}/new.json"
   end
 end

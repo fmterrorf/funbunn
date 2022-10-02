@@ -29,10 +29,9 @@ defmodule Funbunn.DiscordBody do
     |> maybe_add_image(item)
   end
 
-  defp maybe_add_thumbnail(embed, %{thumbnail: thumbnail} = param)
-       when thumbnail not in ["", "self"] do
+  defp maybe_add_thumbnail(embed, %{thumbnail: "http" <> _rest} = param) do
     Map.put(embed, :thumbnail, %{
-      url: thumbnail,
+      url: param.thumbnail,
       height: param.thumbnail_height,
       width: param.thumbnail_width
     })

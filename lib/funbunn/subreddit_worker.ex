@@ -2,7 +2,7 @@ defmodule Funbunn.SubredditWorker do
   use GenServer, restart: :temporary
   require Logger
 
-  @poll_interval :timer.minutes(10)
+  @poll_interval :timer.minutes(1)
 
   def start_link(subreddit) do
     GenServer.start_link(__MODULE__, subreddit)
@@ -16,18 +16,10 @@ defmodule Funbunn.SubredditWorker do
   end
 
   @impl true
-  def handle_info(:poll, {subreddit, last_thread_name} = state) do
+  def handle_info(:poll, {subreddit, _last_thread_name} = state) do
     state =
-      with {:ok, entries = [%{name: latest_thread_name} | _]} <-
-             Funbunn.Api.fetch_new_entries(subreddit, last_thread_name) do
-        send_to_discord(entries, subreddit)
-
-        Funbunn.Store.insert_subreddit!(%{
-          name: subreddit,
-          last_thread_name_seen: latest_thread_name
-        })
-
-        {subreddit, latest_thread_name}
+      with {:ok, thread_name} <- last_thread_name(state) do
+        {subreddit, thread_name}
       else
         {:error, reason} ->
           Logger.error("Fetching new entries failed. Reason: #{inspect(reason)}")
@@ -39,6 +31,38 @@ defmodule Funbunn.SubredditWorker do
 
     Process.send_after(self(), :poll, @poll_interval)
     {:noreply, state}
+  end
+
+  def last_thread_name({subreddit, last_thread_name} = _state) do
+    Logger.info("Try fetching for new entries for sub: #{subreddit}")
+    with {:ok, entries} = Funbunn.Api.fetch_new_entries(subreddit, before: last_thread_name) do
+      case entries do
+        entries = [%{name: thread_name} | _] ->
+          send_to_discord(entries, subreddit)
+
+          Funbunn.Store.insert_subreddit!(%{
+            name: subreddit,
+            last_thread_name_seen: thread_name
+          })
+
+          {:ok, thread_name}
+
+        [] ->
+          Logger.info("Do a retry fetching for new entries for sub: #{subreddit}")
+          with {:ok, [%{name: thread_name} | _] = entries} <-
+                 Funbunn.Api.fetch_new_entries(subreddit) do
+            Enum.take_while(entries, fn item -> item.name != last_thread_name end)
+            |> send_to_discord(subreddit)
+
+            Funbunn.Store.insert_subreddit!(%{
+              name: subreddit,
+              last_thread_name_seen: thread_name
+            })
+
+            {:ok, thread_name}
+          end
+      end
+    end
   end
 
   # PUBSUB
@@ -80,4 +104,5 @@ defmodule Funbunn.SubredditWorker do
       Funbunn.SubredditWorker.publish(subreddit, {:deliver, id})
     end)
   end
+  defp send_to_discord(_items, _subreddit), do: :ok
 end
