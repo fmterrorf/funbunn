@@ -3,7 +3,7 @@ defmodule Funbunn.StorePostgres.Subreddits do
 
   schema "subreddits" do
     field(:name, :string)
-    field(:thread_ids, {:array, :string})
+    field(:last_thread_name_seen, :string)
 
     timestamps()
   end
@@ -17,7 +17,7 @@ defmodule Funbunn.StorePostgres do
   @impl true
   def subreddit(subreddit_name) do
     if sub = Repo.get_by(Funbunn.StorePostgres.Subreddits, name: subreddit_name) do
-      %{name: sub.name, thread_ids: sub.thread_ids}
+      %{name: sub.name, last_thread_name_seen: sub.last_thread_name_seen}
     end
   end
 
@@ -25,10 +25,10 @@ defmodule Funbunn.StorePostgres do
   def insert_subreddit!(subreddit) do
     %Funbunn.StorePostgres.Subreddits{
       name: subreddit.name,
-      thread_ids: subreddit.thread_ids
+      last_thread_name_seen: subreddit.last_thread_name_seen
     }
     |> Repo.insert!(
-      on_conflict: [set: [thread_ids: subreddit.thread_ids]],
+      on_conflict: [set: [last_thread_name_seen: subreddit.last_thread_name_seen]],
       conflict_target: :name
     )
   end

@@ -1,7 +1,7 @@
 defmodule Funbunn.Store do
   @type subreddit :: %{
           name: binary(),
-          thread_ids: [binary()]
+          last_thread_name_seen: binary()
         }
 
   @callback subreddit(String.t()) :: subreddit() | nil

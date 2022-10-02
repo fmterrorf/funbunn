@@ -2,6 +2,7 @@ defmodule Funbunn.Api do
   @host "https://reddit.com"
 
   @type reddit_response :: %{
+          name: binary(),
           author_name: binary(),
           link: binary(),
           title: binary(),
@@ -11,9 +12,9 @@ defmodule Funbunn.Api do
           thubnail_width: non_neg_integer() | nil
         }
 
-  @spec fetch_new_entries(binary()) :: {:ok, [reddit_response()]} | {:error, any()}
-  def fetch_new_entries(subbreddit) do
-    json_link(subbreddit)
+  @spec fetch_new_entries(binary(), binary()) :: {:ok, [reddit_response()]} | {:error, any()}
+  def fetch_new_entries(subbreddit, last_thread_name) do
+    json_link(subbreddit, last_thread_name)
     |> Req.get!()
     |> handle_response
   end
@@ -22,6 +23,7 @@ defmodule Funbunn.Api do
     transformed_data =
       Enum.map(body["data"]["children"], fn %{"data" => data} ->
         %{
+          name: data["name"],
           url: data["url"],
           author_name: data["author"],
           created_utc: data["created_utc"],
@@ -45,7 +47,13 @@ defmodule Funbunn.Api do
     {:error, "call to reddit returned with error status #{response.status}"}
   end
 
-  def json_link(subreddit) do
-    "#{@host}/r/#{subreddit}/.json"
+  def json_link(subreddit, last_thread_name) do
+    url = "#{@host}/r/#{subreddit}/new.json"
+
+    if last_thread_name do
+      "#{url}?before=#{last_thread_name}"
+    else
+      url
+    end
   end
 end
