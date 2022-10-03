@@ -1,16 +1,7 @@
 defmodule Funbunn.Api do
   @host "https://reddit.com"
 
-  @type reddit_response :: %{
-          name: binary(),
-          author_name: binary(),
-          link: binary(),
-          title: binary(),
-          id: binary(),
-          thumbnail: binary() | nil,
-          thumbnail_height: non_neg_integer() | nil,
-          thubnail_width: non_neg_integer() | nil
-        }
+  @type reddit_response :: map()
 
   @spec fetch_new_entries(binary(), keyword()) :: {:ok, [reddit_response()]} | {:error, any()}
   def fetch_new_entries(subbreddit, opts \\ []) do
