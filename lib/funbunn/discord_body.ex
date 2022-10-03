@@ -10,7 +10,7 @@ defmodule Funbunn.DiscordBody do
 
     items =
       Enum.sort_by(rest, fn item -> item.created_utc end)
-      |> Enum.map(&component/1)
+      |> Enum.map(&embed/1)
       |> Enum.chunk_every(10)
       |> Enum.map(fn embeds -> %{embeds: embeds} end)
 
@@ -20,17 +20,8 @@ defmodule Funbunn.DiscordBody do
   end
 
   def gallery_message(item) do
-    url = "https://www.reddit.com" <> item.permalink
-
     title_embed =
-      %{
-        title: limit_string(item.title, @title_limit),
-        url: "https://www.reddit.com" <> item.permalink,
-        description: limit_string(item.selftext, @description_limit),
-        footer: %{
-          text: item.subreddit_name_prefixed
-        }
-      }
+      new_embed(item)
       |> add_author(item)
       |> maybe_add_flair(item)
       |> maybe_add_external_link(item)
@@ -41,7 +32,7 @@ defmodule Funbunn.DiscordBody do
       |> Enum.take(10)
       |> Enum.map(fn {_id, meta} ->
         %{
-          url: url,
+          url: title_embed.url,
           image: %{url: meta["s"]["u"]}
         }
       end)
@@ -51,15 +42,8 @@ defmodule Funbunn.DiscordBody do
     %{embeds: [Map.merge(title_embed, first_embed) | rest_embed]}
   end
 
-  def component(item) do
-    %{
-      title: limit_string(item.title, @title_limit),
-      url: "https://www.reddit.com" <> item.permalink,
-      description: limit_string(item.selftext, @description_limit),
-      footer: %{
-        text: item.subreddit_name_prefixed
-      }
-    }
+  def embed(item) do
+    new_embed(item)
     |> add_timestamp(item)
     |> add_author(item)
     |> maybe_add_thumbnail(item)
@@ -67,6 +51,18 @@ defmodule Funbunn.DiscordBody do
     |> maybe_add_image(item)
     |> maybe_add_flair(item)
     |> maybe_add_external_link(item)
+  end
+
+  def new_embed(item) do
+    %{
+      title: limit_string(item.title, @title_limit),
+      url: "https://www.reddit.com" <> item.permalink,
+      description: limit_string(item.selftext, @description_limit),
+      fields: [],
+      footer: %{
+        text: item.subreddit_name_prefixed
+      }
+    }
   end
 
   defp maybe_add_thumbnail(embed, %{thumbnail: "http" <> _rest} = param) do
@@ -121,7 +117,8 @@ defmodule Funbunn.DiscordBody do
 
   defp maybe_add_flair(embed, _item), do: embed
 
-  defp maybe_add_external_link(embed, %{post_hint: "link"} = item) do
+  defp maybe_add_external_link(embed, %{post_hint: post_hint} = item)
+       when post_hint in ["link", "rich:video"] do
     Map.update(embed, :fields, [], fn fields ->
       [
         %{name: "Link", value: item.url, inline: true} | fields
