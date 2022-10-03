@@ -15,7 +15,7 @@ defmodule Funbunn.Api do
   @spec fetch_new_entries(binary(), keyword()) :: {:ok, [reddit_response()]} | {:error, any()}
   def fetch_new_entries(subbreddit, opts \\ []) do
     json_link(subbreddit)
-    |> Req.get!(params: opts)
+    |> Req.get!(params: Keyword.merge(opts, raw_json: 1))
     |> handle_response
   end
 
@@ -36,7 +36,9 @@ defmodule Funbunn.Api do
           thumbnail_height: data["thumbnail_height"],
           thumbnail_width: data["thumbnail_width"],
           is_video: data["is_video"],
-          media: data["media"]
+          media: data["media"],
+          is_gallery: data["is_gallery"],
+          media_metadata: data["media_metadata"]
         }
       end)
 

@@ -14,13 +14,16 @@ defmodule Funbunn.WebhookDeliveryWorker do
   def handle_info({:deliver, key}, state) do
     attachment = Funbunn.Cache.get({:messages, key})
 
-    res = Req.post!(
-      state.webhook,
-      json: attachment
-    )
+    res =
+      Req.post!(
+        state.webhook,
+        json: attachment
+      )
 
     if res.status >= 400 do
-      Logger.error("WebhookDeliveryWorker encountered status: #{res.status}, reason: #{inspect(res.body)}")
+      Logger.error(
+        "WebhookDeliveryWorker encountered status: #{res.status}, reason: #{inspect(res.body)}, #{inspect(body: res.body)}"
+      )
     end
 
     {:noreply, state}
