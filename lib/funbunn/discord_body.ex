@@ -1,6 +1,8 @@
 defmodule Funbunn.DiscordBody do
   alias Funbunn.Api
   @icon_url "https://www.redditstatic.com/desktop2x/img/favicon/favicon-32x32.png"
+  @title_limit 256
+  @description_limit 4096
 
   @spec new([Api.reddit_response()]) :: [any()]
   def new(entries) do
@@ -22,9 +24,9 @@ defmodule Funbunn.DiscordBody do
 
     title_embed =
       %{
-        title: limit_string(item.title, 256),
+        title: limit_string(item.title, @title_limit),
         url: "https://www.reddit.com" <> item.permalink,
-        description: limit_string(item.selftext, 4096),
+        description: limit_string(item.selftext, @description_limit),
         footer: %{
           text: item.subreddit_name_prefixed
         }
@@ -46,9 +48,9 @@ defmodule Funbunn.DiscordBody do
 
   def component(item) do
     %{
-      title: limit_string(item.title, 256),
+      title: limit_string(item.title, @title_limit),
       url: "https://www.reddit.com" <> item.permalink,
-      description: limit_string(item.selftext, 4096),
+      description: limit_string(item.selftext, @description_limit),
       footer: %{
         text: item.subreddit_name_prefixed
       }
