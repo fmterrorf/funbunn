@@ -38,7 +38,9 @@ defmodule Funbunn.Api do
           is_video: data["is_video"],
           media: data["media"],
           is_gallery: data["is_gallery"],
-          media_metadata: data["media_metadata"]
+          media_metadata: data["media_metadata"],
+          link_flair_text: data["link_flair_text"],
+          post_hint: data["post_hint"]
         }
       end)
 

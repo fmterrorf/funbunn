@@ -32,6 +32,7 @@ defmodule Funbunn.DiscordBody do
         }
       }
       |> add_author(item)
+      |> maybe_add_flair(item)
 
     img_embed =
       Enum.to_list(item.media_metadata)
@@ -59,6 +60,7 @@ defmodule Funbunn.DiscordBody do
     |> maybe_add_thumbnail(item)
     |> maybe_add_video(item)
     |> maybe_add_image(item)
+    |> maybe_add_flair(item)
   end
 
   defp maybe_add_thumbnail(embed, %{thumbnail: "http" <> _rest} = param) do
@@ -79,13 +81,9 @@ defmodule Funbunn.DiscordBody do
 
   defp maybe_add_video(embed, _arg), do: embed
 
-  defp maybe_add_image(embed, %{url: url}) do
-    if String.ends_with?(url, ".jpg") do
-      Map.drop(embed, [:thumbnail])
-      |> Map.put(:image, %{url: url})
-    else
-      embed
-    end
+  defp maybe_add_image(embed, %{post_hint: "image"} = item) do
+    Map.drop(embed, [:thumbnail])
+    |> Map.put(:image, %{url: item.url})
   end
 
   defp maybe_add_image(embed, _arg), do: embed
@@ -97,6 +95,14 @@ defmodule Funbunn.DiscordBody do
       icon_url: @icon_url
     })
   end
+
+  defp maybe_add_flair(embed, item) when is_binary(item.link_flair_text) do
+    Map.put(embed, :fields, [
+      %{name: "Flair", value: item.link_flair_text, inline: true}
+    ])
+  end
+
+  defp maybe_add_flair(embed, _item), do: embed
 
   def limit_string(str, length) do
     actual_length = length - 3
