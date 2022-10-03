@@ -2,7 +2,7 @@ defmodule Funbunn.SubredditWorker do
   use GenServer, restart: :temporary
   require Logger
 
-  @poll_interval :timer.minutes(1)
+  @poll_interval :timer.minutes(10)
 
   def start_link(subreddit) do
     GenServer.start_link(__MODULE__, subreddit)
@@ -35,6 +35,7 @@ defmodule Funbunn.SubredditWorker do
 
   def last_thread_name({subreddit, last_thread_name} = _state) do
     Logger.info("Try fetching for new entries for sub: #{subreddit}")
+
     with {:ok, entries} = Funbunn.Api.fetch_new_entries(subreddit, before: last_thread_name) do
       case entries do
         entries = [%{name: thread_name} | _] ->
@@ -49,6 +50,7 @@ defmodule Funbunn.SubredditWorker do
 
         [] ->
           Logger.info("Do a retry fetching for new entries for sub: #{subreddit}")
+
           with {:ok, [%{name: thread_name} | _] = entries} <-
                  Funbunn.Api.fetch_new_entries(subreddit) do
             Enum.take_while(entries, fn item -> item.name != last_thread_name end)
@@ -104,5 +106,6 @@ defmodule Funbunn.SubredditWorker do
       Funbunn.SubredditWorker.publish(subreddit, {:deliver, id})
     end)
   end
+
   defp send_to_discord(_items, _subreddit), do: :ok
 end
