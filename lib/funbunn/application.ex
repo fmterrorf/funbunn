@@ -31,7 +31,7 @@ defmodule Funbunn.Application do
       Enum.map(route_configs, fn config ->
         Supervisor.child_spec(
           {Funbunn.WebhookDeliveryWorker, config},
-          id: {Funbunn.WebhookDeliveryWorker, config.subreddit}
+          id: {Funbunn.WebhookDeliveryWorker, config}
         )
       end)
 

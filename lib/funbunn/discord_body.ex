@@ -84,11 +84,20 @@ defmodule Funbunn.DiscordBody do
   defp maybe_add_video(embed, _arg), do: embed
 
   defp maybe_add_image(embed, %{post_hint: "image"} = item) do
-    Map.drop(embed, [:thumbnail])
-    |> Map.put(:image, %{url: item.url})
+    do_add_image(embed, item.url)
+  end
+
+  defp maybe_add_image(embed, %{post_hint: "link", preview: %{"images" => images}}) do
+    [%{"source" => %{"url" => url}} | _] = images
+    do_add_image(embed, url)
   end
 
   defp maybe_add_image(embed, _arg), do: embed
+
+  defp do_add_image(embed, image_url) do
+    Map.drop(embed, [:thumbnail])
+    |> Map.put(:image, %{url: image_url})
+  end
 
   defp add_timestamp(embed, item) do
     timestamp =
