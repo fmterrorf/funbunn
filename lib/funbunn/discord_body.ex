@@ -88,7 +88,7 @@ defmodule Funbunn.DiscordBody do
   end
 
   defp maybe_add_image(embed, %{post_hint: "link", preview: %{"images" => images}}) do
-    [%{"source" =>  %{"url" => url}} | _] = images
+    [%{"source" => %{"url" => url}} | _] = images
     do_add_image(embed, url)
   end
 
