@@ -17,7 +17,11 @@ defmodule Funbunn.Api do
           name: data["name"],
           url: data["url"],
           author_name: data["author"],
-          created_at: trunc(data["created_utc"]) |> DateTime.from_unix!(),
+          created_at:
+            trunc(data["created_utc"])
+            |> DateTime.from_unix!()
+            |> DateTime.to_naive()
+            |> NaiveDateTime.truncate(:second),
           permalink: data["permalink"],
           title: data["title"],
           selftext: data["selftext"],

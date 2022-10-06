@@ -9,8 +9,7 @@ defmodule Funbunn.DiscordBody do
     {gallery, rest} = Enum.split_with(entries, fn item -> item.is_gallery end)
 
     items =
-      Enum.sort_by(rest, fn item -> item.created_utc end)
-      |> Enum.map(&embed/1)
+      Enum.map(rest, &embed/1)
       |> Enum.chunk_every(10)
       |> Enum.map(fn embeds -> %{embeds: embeds} end)
 
@@ -102,7 +101,7 @@ defmodule Funbunn.DiscordBody do
   defp add_timestamp(embed, item) do
     timestamp =
       item.created_at
-      |> DateTime.to_iso8601()
+      |> NaiveDateTime.to_iso8601()
 
     Map.put(embed, :timestamp, timestamp)
   end

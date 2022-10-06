@@ -35,7 +35,10 @@ defmodule Funbunn.SubredditWorker do
 
     with {:ok, entries} <- Funbunn.Api.fetch_new_entries(subreddit),
          {:ok, new_entries} <- filter_new_posts(entries, last_poll_time) do
-      last_poll_time = NaiveDateTime.utc_now()
+      last_poll_time =
+        NaiveDateTime.utc_now()
+        |> NaiveDateTime.truncate(:second)
+
       send_to_discord(new_entries, subreddit)
 
       Funbunn.Store.insert_subreddit!(%{
@@ -82,7 +85,7 @@ defmodule Funbunn.SubredditWorker do
   defp last_poll_time(subreddit) do
     case Funbunn.Store.subreddit(subreddit) do
       %{last_poll_time: time} when time != nil -> time
-      _ -> NaiveDateTime.utc_now()
+      _ -> NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
     end
   end
 
