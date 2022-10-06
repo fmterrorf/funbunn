@@ -2,7 +2,7 @@ defmodule Funbunn.SubredditWorker do
   use GenServer, restart: :temporary
   require Logger
 
-  @poll_interval :timer.minutes(5)
+  @poll_interval :timer.minutes(1)
 
   def start_link(subreddit) do
     GenServer.start_link(__MODULE__, subreddit)
@@ -12,58 +12,38 @@ defmodule Funbunn.SubredditWorker do
   def init(subreddit) do
     Logger.info("Starting #{__MODULE__} for #{subreddit}")
     send(self(), :poll)
-    {:ok, {subreddit, thread_name_from_store(subreddit)}}
+    {:ok, {subreddit, last_poll_time(subreddit)}}
   end
 
   @impl true
-  def handle_info(:poll, {subreddit, _last_thread_name} = state) do
-    state =
-      with {:ok, thread_name} <- last_thread_name(state) do
-        {subreddit, thread_name}
+  def handle_info(:poll, {subreddit, _} = state) do
+    new_state =
+      with {:ok, poll_time} <- do_poll(state) do
+        {subreddit, poll_time}
       else
-        {:error, reason} ->
-          Logger.error("Fetching new entries failed. Reason: #{inspect(reason)}")
-
-        _ ->
-          Logger.info("No new entries found for subreddit: #{subreddit}. Skipping...")
-          state
+        _ -> state
       end
 
     Process.send_after(self(), :poll, @poll_interval)
-    {:noreply, state}
+    {:noreply, new_state}
   end
 
-  def last_thread_name({subreddit, last_thread_name} = _state) do
-    Logger.info("Try fetching for new entries for sub: #{subreddit}")
+  def do_poll({subreddit, last_poll_time}) do
+    Logger.info(
+      "Try fetching for new entries for sub: #{subreddit}, last_poll_time: #{inspect(last_poll_time)}"
+    )
 
-    with {:ok, entries} = Funbunn.Api.fetch_new_entries(subreddit, before: last_thread_name) do
-      case entries do
-        entries = [%{name: thread_name} | _] ->
-          send_to_discord(entries, subreddit)
+    with {:ok, entries} <- Funbunn.Api.fetch_new_entries(subreddit),
+         {:ok, new_entries} <- filter_new_posts(entries, last_poll_time) do
+      last_poll_time = NaiveDateTime.utc_now()
+      send_to_discord(new_entries, subreddit)
 
-          Funbunn.Store.insert_subreddit!(%{
-            name: subreddit,
-            last_thread_name_seen: thread_name
-          })
+      Funbunn.Store.insert_subreddit!(%{
+        name: subreddit,
+        last_poll_time: last_poll_time
+      })
 
-          {:ok, thread_name}
-
-        [] ->
-          Logger.info("Do a retry fetching for new entries for sub: #{subreddit}")
-
-          with {:ok, [%{name: thread_name} | _] = entries} <-
-                 Funbunn.Api.fetch_new_entries(subreddit) do
-            Enum.take_while(entries, fn item -> item.name != last_thread_name end)
-            |> send_to_discord(subreddit)
-
-            Funbunn.Store.insert_subreddit!(%{
-              name: subreddit,
-              last_thread_name_seen: thread_name
-            })
-
-            {:ok, thread_name}
-          end
-      end
+      {:ok, last_poll_time}
     end
   end
 
@@ -90,9 +70,19 @@ defmodule Funbunn.SubredditWorker do
 
   # Helpers
 
-  defp thread_name_from_store(subreddit) do
-    if sub = Funbunn.Store.subreddit(subreddit) do
-      sub.last_thread_name_seen
+  defp filter_new_posts(entries, cutoff) do
+    case Enum.take_while(entries, fn item ->
+           NaiveDateTime.compare(item.created_at, cutoff) == :gt
+         end) do
+      [_ | _] = items -> {:ok, items}
+      _ -> {:error, :no_new_items}
+    end
+  end
+
+  defp last_poll_time(subreddit) do
+    case Funbunn.Store.subreddit(subreddit) do
+      %{last_poll_time: time} when time != nil -> time
+      _ -> NaiveDateTime.utc_now()
     end
   end
 
@@ -106,6 +96,4 @@ defmodule Funbunn.SubredditWorker do
       Funbunn.SubredditWorker.publish(subreddit, {:deliver, id})
     end)
   end
-
-  defp send_to_discord(_items, _subreddit), do: :ok
 end

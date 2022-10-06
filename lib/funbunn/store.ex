@@ -1,7 +1,7 @@
 defmodule Funbunn.Store do
   @type subreddit :: %{
           name: binary(),
-          last_thread_name_seen: binary()
+          last_poll_time: NaiveDateTime.t()
         }
 
   @callback subreddit(String.t()) :: subreddit() | nil

@@ -17,7 +17,7 @@ defmodule Funbunn.Api do
           name: data["name"],
           url: data["url"],
           author_name: data["author"],
-          created_utc: data["created_utc"],
+          created_at: trunc(data["created_utc"]) |> DateTime.from_unix!(),
           permalink: data["permalink"],
           title: data["title"],
           selftext: data["selftext"],

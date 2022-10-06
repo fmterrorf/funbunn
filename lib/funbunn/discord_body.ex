@@ -101,8 +101,7 @@ defmodule Funbunn.DiscordBody do
 
   defp add_timestamp(embed, item) do
     timestamp =
-      trunc(item.created_utc)
-      |> DateTime.from_unix!()
+      item.created_at
       |> DateTime.to_iso8601()
 
     Map.put(embed, :timestamp, timestamp)
