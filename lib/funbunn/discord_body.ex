@@ -74,14 +74,6 @@ defmodule Funbunn.DiscordBody do
 
   defp maybe_add_thumbnail(embed, _arg), do: embed
 
-  defp maybe_add_video(embed, %{is_video: true, media: %{"reddit_video" => video}}) do
-    Map.update(embed, :description, "", fn description ->
-      description <> "\n\n" <> "[Video](#{video["fallback_url"]})"
-    end)
-  end
-
-  defp maybe_add_video(embed, _arg), do: embed
-
   defp maybe_add_image(embed, %{post_hint: "image"} = item) do
     do_add_image(embed, item.url)
   end
@@ -113,6 +105,16 @@ defmodule Funbunn.DiscordBody do
       icon_url: @icon_url
     })
   end
+
+  defp maybe_add_video(embed, %{is_video: true, media: %{"reddit_video" => video}}) do
+    Map.update(embed, :fields, [], fn fields ->
+      [
+        %{name: "Video", value: video["fallback_url"], inline: true} | fields
+      ]
+    end)
+  end
+
+  defp maybe_add_video(embed, _arg), do: embed
 
   defp maybe_add_flair(embed, item) when is_binary(item.link_flair_text) do
     Map.update(embed, :fields, [], fn fields ->
