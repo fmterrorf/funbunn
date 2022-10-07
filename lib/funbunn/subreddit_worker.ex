@@ -77,7 +77,7 @@ defmodule Funbunn.SubredditWorker do
     Logger.debug("Sending #{length(messages)} to #{subreddit} SubredditWorker")
 
     Enum.each(messages, fn messages ->
-      {_, id} = key = {:messages, Ecto.UUID.generate()}
+      {_, id} = key = {:messages, System.unique_integer([:monotonic])}
       Funbunn.Cache.insert(key, messages)
       Funbunn.SubredditWorker.publish(subreddit, {:deliver, id})
     end)
