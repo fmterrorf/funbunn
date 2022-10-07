@@ -12,11 +12,6 @@ To run
 
 ## Environment variables
 
-* `STORE`  - decides how to store the state of the app. Options are
-  - `inmemory` (default) - use in memory store
-  - `disk` - writes state into disk. Requires `STORE_FILENAME` env var. 
-  - `postgres` - use postgres. Requires `DATABASE_URL` env to be set
-
 * `WEBHOOK_ROUTE_CONFIG_PATH` - absolute path of the config file
 * `WEBHOOK_ROUTE_CONFIG_BASE64` - base64 representation of the config contents. Useful if you want to store the config file in secret env var
 
