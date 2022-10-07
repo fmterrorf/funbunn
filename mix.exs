@@ -25,8 +25,6 @@ defmodule Funbunn.MixProject do
     [
       {:req, "~> 0.3.1"},
       {:sweet_xml, "~> 0.7.1"},
-      {:ecto_sql, "~> 3.0"},
-      {:postgrex, ">= 0.0.0"},
       {:jason, "~> 1.4"},
       {:phoenix_pubsub, "~> 2.0"},
       {:con_cache, "~> 0.13"}
@@ -35,8 +33,6 @@ defmodule Funbunn.MixProject do
 
   defp aliases do
     [
-      "ecto.setup": ["ecto.create", "ecto.migrate"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"]
     ]
   end
 end

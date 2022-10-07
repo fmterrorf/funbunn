@@ -17,7 +17,6 @@ defmodule Funbunn.Application do
            ttl_check_interval: :timer.minutes(20),
            global_ttl: :timer.hours(2)
          ]},
-        Funbunn.Store.repo()
       ]
       |> thread_poller_children(route_config)
       |> message_delivery_children(route_config)

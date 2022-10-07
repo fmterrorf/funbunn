@@ -12,7 +12,7 @@ defmodule Funbunn.SubredditWorker do
   def init(subreddit) do
     Logger.info("Starting #{__MODULE__} for #{subreddit}")
     send(self(), :poll)
-    {:ok, {subreddit, last_poll_time(subreddit)}}
+    {:ok, {subreddit, DateTime.utc_now()}}
   end
 
   @impl true
@@ -35,18 +35,8 @@ defmodule Funbunn.SubredditWorker do
 
     with {:ok, entries} <- Funbunn.Api.fetch_new_entries(subreddit),
          {:ok, new_entries} <- filter_new_posts(entries, last_poll_time) do
-      last_poll_time =
-        NaiveDateTime.utc_now()
-        |> NaiveDateTime.truncate(:second)
-
       send_to_discord(new_entries, subreddit)
-
-      Funbunn.Store.insert_subreddit!(%{
-        name: subreddit,
-        last_poll_time: last_poll_time
-      })
-
-      {:ok, last_poll_time}
+      {:ok, DateTime.utc_now()}
     end
   end
 
@@ -82,19 +72,12 @@ defmodule Funbunn.SubredditWorker do
     end
   end
 
-  defp last_poll_time(subreddit) do
-    case Funbunn.Store.subreddit(subreddit) do
-      %{last_poll_time: time} when time != nil -> time
-      _ -> NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-    end
-  end
-
   defp send_to_discord(items = [_ | _], subreddit) do
     messages = Funbunn.DiscordBody.new(items)
     Logger.debug("Sending #{length(messages)} to #{subreddit} SubredditWorker")
 
     Enum.each(messages, fn messages ->
-      {_, id} = key = {:messages, Ecto.UUID.generate()}
+      {_, id} = key = {:messages, System.unique_integer([:monotonic])}
       Funbunn.Cache.insert(key, messages)
       Funbunn.SubredditWorker.publish(subreddit, {:deliver, id})
     end)
