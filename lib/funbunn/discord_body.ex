@@ -91,11 +91,7 @@ defmodule Funbunn.DiscordBody do
   end
 
   defp add_timestamp(embed, item) do
-    timestamp =
-      item.created_at
-      |> NaiveDateTime.to_iso8601()
-
-    Map.put(embed, :timestamp, timestamp)
+    Map.put(embed, :timestamp, DateTime.to_iso8601(item.created_at))
   end
 
   defp add_author(embed, item) do

@@ -65,7 +65,7 @@ defmodule Funbunn.SubredditWorker do
 
   defp filter_new_posts(entries, cutoff) do
     case Enum.take_while(entries, fn item ->
-           NaiveDateTime.compare(item.created_at, cutoff) == :gt
+           DateTime.compare(item.created_at, cutoff) == :gt
          end) do
       [_ | _] = items -> {:ok, items}
       _ -> {:error, :no_new_items}
