@@ -1,8 +1,5 @@
 import Config
 
-config :funbunn,
-  ecto_repos: [Funbunn.Repo]
-
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
