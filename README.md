@@ -9,6 +9,14 @@ To run
 
         WEBHOOK_ROUTE_CONFIG_PATH="<absolute path to config>.json" ./bin/poll
 
+Running with Docker
+
+```shell
+docker run -v ${PWD}/config.json:/app/config.json \
+         -e WEBHOOK_ROUTE_CONFIG_PATH=/app/config.json \
+        daven/funbunn
+```
+
 
 ## Environment variables
 
