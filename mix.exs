@@ -27,7 +27,7 @@ defmodule Funbunn.MixProject do
       {:sweet_xml, "~> 0.7.1"},
       {:jason, "~> 1.4"},
       {:phoenix_pubsub, "~> 2.0"},
-      {:con_cache, "~> 0.13"}
+      {:con_cache, "~> 1.0"}
     ]
   end
 
