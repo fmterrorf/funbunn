@@ -1,5 +1,5 @@
 defmodule Funbunn.SubredditWorker do
-  use GenServer, restart: :temporary
+  use GenServer
   require Logger
 
   @poll_interval :timer.minutes(1)
