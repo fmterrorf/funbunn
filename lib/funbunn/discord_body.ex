@@ -43,6 +43,7 @@ defmodule Funbunn.DiscordBody do
 
   def embed(item) do
     new_embed(item)
+    |> add_old_link(item)
     |> add_timestamp(item)
     |> add_author(item)
     |> maybe_add_thumbnail(item)
@@ -62,6 +63,14 @@ defmodule Funbunn.DiscordBody do
         text: item.subreddit_name_prefixed
       }
     }
+  end
+
+  defp add_old_link(embed, item) do
+    Map.update(embed, :fields, [], fn fields ->
+      [
+        %{name: "🔗 old.reddit.com", value: "[Link](https://old.reddit.com#{item.permalink})", inline: false} | fields
+      ]
+    end)
   end
 
   defp maybe_add_thumbnail(embed, %{thumbnail: "http" <> _rest} = param) do
