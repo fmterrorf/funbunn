@@ -12,7 +12,7 @@ defmodule Funbunn.SubredditWorker do
   def init(subreddit) do
     Logger.info("Starting #{__MODULE__} for #{subreddit}")
     send(self(), :poll)
-    {:ok, {subreddit, DateTime.utc_now()}}
+    {:ok, {subreddit, DateTime.utc_now() |> DateTime.add(-60 * 5, :minute)}}
   end
 
   @impl true

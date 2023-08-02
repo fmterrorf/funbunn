@@ -68,7 +68,7 @@ defmodule Funbunn.DiscordBody do
   defp add_old_link(embed, item) do
     Map.update(embed, :fields, [], fn fields ->
       [
-        %{name: "old 🔗", value: "https://old.reddit.com" <> item.permalink, inline: false} | fields
+        %{name: "🔗 old.reddit.com", value: "[Link](https://old.reddit.com#{item.permalink})", inline: false} | fields
       ]
     end)
   end
